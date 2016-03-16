@@ -1,0 +1,8 @@
+Run with:
+
+    rosrun rpi_gpio rpi_gpio_node.py
+
+Set pins states with:
+
+    rosservice call /rpi_gpio/set_pin 21 1
+    rosservice call /rpi_gpio/set_pin 21 0
