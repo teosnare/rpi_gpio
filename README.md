@@ -11,16 +11,21 @@ This code was developed and tested under ROS Indigo on Ubuntu 14.04. This is res
 Installation
 ------------
 
-Initialize your project's custom [stacks directory](http://wiki.ros.org/ROS/Tutorials/StackInstallation) then checkout the git project like:
+Create an [overlay workspace](http://wiki.ros.org/catkin/Tutorials/workspace_overlaying) and clone the code like:
 
-    cd ~/myproject/stacks
+    mkdir -p /path/to/your/overlay/src
+    cd /path/to/your/overlay/src
     git clone https://github.com/chrisspen/rpi_gpio.git
+    source /opt/ros/indigo/setup.bash
+    cd ..
+    catkin_make
 
-When initializing your shell environment, ensure your custom stacks directory is in the `ROS_PACKAGE_PATH` environment variable. A script to set your workspace environment to automatically do this might look like:
+Then, when initializing your shell environment for your main workspace, ensure you source this overlay like:
 
-    . ./devel/setup.sh
-    ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:~/myproject/stacks
-    export ROS_PACKAGE_PATH
+    cd /path/to/your/main/workspace
+    source ./devel/setup.sh
+    source /path/to/your/overlay/devel/setup.bash
+    catkin_make
 
 Usage
 -----
