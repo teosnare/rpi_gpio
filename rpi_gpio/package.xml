@@ -1,14 +1,14 @@
 <?xml version="1.0"?>
 <package>
   <name>rpi_gpio</name>
-  <version>0.0.0</version>
+  <version>0.0.1</version>
   <description>The rpi_gpio package</description>
 
   <maintainer email="chrisspen@gmail.com">Chris Spencer</maintainer>
 
-  <license>BSD</license>
+  <license>MIT</license>
 
-  <url type="website">http://wiki.ros.org/rpi_gpio</url>
+  <url type="website">https://github.com/chrisspen/rpi_gpio</url>
 
   <buildtool_depend>catkin</buildtool_depend>
   

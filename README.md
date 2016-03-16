@@ -1,2 +1,2 @@
-RPi-GPIO - A ROS for managing GPIO pins on a Raspberry Pi
-=========================================================
+RPi-GPIO - A ROS node for managing GPIO pins on a Raspberry Pi
+==============================================================
