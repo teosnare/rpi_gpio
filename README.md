@@ -11,7 +11,16 @@ This code was developed and tested under ROS Indigo on Ubuntu 14.04. This is res
 Installation
 ------------
 
-todo
+Initialize your project's custom [stacks directory](http://wiki.ros.org/ROS/Tutorials/StackInstallation) then checkout the git project like:
+
+    cd ~/myproject/stacks
+    git clone https://github.com/chrisspen/rpi_gpio.git
+
+When initializing your shell environment, ensure your custom stacks directory is in the `ROS_PACKAGE_PATH` environment variable. A script to set your workspace environment to automatically do this might look like:
+
+    . ./devel/setup.sh
+    ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:~/myproject/stacks
+    export ROS_PACKAGE_PATH
 
 Usage
 -----
@@ -28,9 +37,9 @@ See `config/example.yaml` for an illustration of parameters accepted.
 
 Three basic parameters are available:
 
-    1. directions: A hash listing which pins are inputs or outputs. Any pin not listed here will be assumed not in use and unmanaged by the node.
-    2. states: A hash listing the initial state to set output pins.
-    3. shutdown_states: A hash listing the state to set output pins to before safely shutting down.
+1. directions: A hash listing which pins are inputs (in) or outputs (out). Any pin not listed here will be assumed not in use and will not be managed by the node.
+2. states: A hash listing the initial state of each output pin.
+3. shutdown_states: A hash listing the state to set output pins to before safely shutting down.
 
 Once running, you can set pins states from the command line with:
 
