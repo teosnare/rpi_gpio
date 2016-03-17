@@ -49,7 +49,17 @@ class RPiGPIO():
     def __init__(self):
         
         rospy.init_node('rpi_gpio', log_level=rospy.DEBUG)
-                
+        
+        # Pin numbers are the GPIO# value, not the literal pin number.
+        # Setting direction here is necessary because wiringpi2 doesn't support setMode() at time of writing.
+        self.directions = rospy.get_param("~directions", {})
+        
+        # These states will be set to pins right before the node shuts down.
+        self.shutdown_states = rospy.get_param("~shutdown_states", {})
+        
+        # Set default states.
+        self.states = rospy.get_param("~states", {})
+        
         # Cleanup when termniating the node
         rospy.on_shutdown(self.shutdown)
         
@@ -57,32 +67,36 @@ class RPiGPIO():
         self.rate = int(rospy.get_param("~rate", 50))
         r = rospy.Rate(self.rate)
         
-        # Pin numbers are the GPIO# value, not the literal pin number.
-        # Setting direction here is necessary because wiringpi2 doesn't support setMode() at time of writing.
-        self.directions = rospy.get_param("~directions", {})
-        for pin, direction in self.directions.iteritems():
+        for pin, direction in self.directions.items():
+            if not isinstance(pin, int):
+                del self.directions[pin]
+            pin = int(pin)
+            self.directions[pin] = direction
             # May give the error:
             # bash: echo: write error: Device or resource busy
             # if the pin was left exported
             assert pin in RPI2_GPIO_PINS, 'Invalid pin: %s' % pin
             assert direction in (IN, OUT), 'Invalid direction for pin %s: %s' % (pin, direction)
-            cmd = 'cd /sys/class/gpio; echo {pin} > export; echo {direction} > gpio{pin}/direction'.format(pin=pin, direction=direction)
-            print cmd
-            os.system(cmd)
+            
+            self.export_pin(pin, direction)
         
         wiringpi2.wiringPiSetupSys()
         
-        # Set default states.
-        self.states = rospy.get_param("~states", {})
-        for pin, state in self.states.iteritems():
+        for pin, state in self.states.items():
+            if not isinstance(pin, int):
+                del self.states[pin]
+            pin = int(pin)
+            self.states[pin] = state
             msg = DigitalWrite()
-            msg.pin = pin
+            msg.pin = int(pin)
             msg.state = state
             self._set_pin_handler(msg)
     
-        # These states will be set to pins right before the node shuts down.
-        self.shutdown_states = rospy.get_param("~shutdown_states", {})
-        for pin, state in self.shutdown_states.iteritems():
+        for pin, state in self.shutdown_states.items():
+            if not isinstance(pin, int):
+                del self.shutdown_states[pin]
+            pin = int(pin)
+            self.shutdown_states[pin] = state
             assert pin in RPI2_GPIO_PINS, 'Invalid pin: %s' % pin
             assert state in (0, 1), 'Invalid shutdown state for pin %s: %s' % (pin, state)
     
@@ -100,12 +114,27 @@ class RPiGPIO():
 
             r.sleep()
  
+    def export_pin(self, pin, direction):
+        if not os.path.isfile('/sys/class/gpio/gpio{pin}'.format(pin=pin)):
+            cmd = 'cd /sys/class/gpio; echo {pin} > export;'.format(pin=pin)
+            print cmd
+            os.system(cmd)
+        while 1:
+            cmd = 'cd /sys/class/gpio; echo {direction} > gpio{pin}/direction'.format(pin=pin, direction=direction)
+            print cmd
+            ret = os.system(cmd)
+            if ret:
+                time.sleep(0.1)
+            else:
+                break
+ 
     def _set_pin_handler(self, msg):
         assert msg.pin in RPI2_GPIO_PINS, 'Invalid pin: %s' % msg.pin
         assert msg.state in (True, False, 0, 1), 'Invalid state: %s' % msg.state
         assert msg.pin in self.directions, 'Pin %s has not been exported.' % msg.pin
         assert self.directions[msg.pin] == OUT, 'Pin %s is not an output.' % msg.pin
         wiringpi2.digitalWrite(msg.pin, msg.state)
+        return DigitalWriteResponse()
  
     def shutdown(self):
         
@@ -113,7 +142,7 @@ class RPiGPIO():
         rospy.loginfo("Reseting pin states...")
         for pin, state in self.shutdown_states.iteritems():
             msg = DigitalWrite()
-            msg.pin = pin
+            msg.pin = int(pin)
             msg.state = state
             self._set_pin_handler(msg)
         
