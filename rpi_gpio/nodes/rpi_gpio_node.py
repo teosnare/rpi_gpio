@@ -102,7 +102,7 @@ class RPiGPIO():
     
         # Define publishers and services.
         #self.get_pin_pub = rospy.Publisher('~get_pin', msgs.DigitalRead)
-        self.pin_change_pub = rospy.Publisher('~pin_change', msgs.DigitalChange)
+        self.pin_change_pub = rospy.Publisher('~pin_change', msgs.DigitalChange, queue_size=10)
         rospy.Service('~set_pin', DigitalWrite, self._set_pin_handler)
         
         # Start polling the sensors and base controller
