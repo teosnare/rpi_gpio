@@ -136,8 +136,8 @@ class RPiGPIO():
         assert self.directions[msg.pin] == OUT, 'Pin %s is not an output.' % msg.pin
         wiringpi2.digitalWrite(msg.pin, msg.state)
         
-        old_state = self.states.get(pin, None)
-        self.states[pin] = msg.state
+        old_state = self.states.get(msg.pin, None)
+        self.states[msg.pin] = msg.state
         if old_state != msg.state:
             new_msg = msgs.DigitalChange()
             new_msg.pin = msg.pin
