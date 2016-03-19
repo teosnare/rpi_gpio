@@ -116,11 +116,11 @@ class RPiGPIO():
  
     def export_pin(self, pin, direction):
         if not os.path.isfile('/sys/class/gpio/gpio{pin}'.format(pin=pin)):
-            cmd = 'cd /sys/class/gpio; echo {pin} > export;'.format(pin=pin)
+            cmd = 'echo {pin} > /sys/class/gpio/export'.format(pin=pin)
             print cmd
             os.system(cmd)
         while 1:
-            cmd = 'cd /sys/class/gpio; echo {direction} > gpio{pin}/direction'.format(pin=pin, direction=direction)
+            cmd = 'echo {direction} > /sys/class/gpio/gpio{pin}/direction'.format(pin=pin, direction=direction)
             print cmd
             ret = os.system(cmd)
             if ret:
