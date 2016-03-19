@@ -102,6 +102,7 @@ class RPiGPIO():
     
         # Define publishers and services.
         #self.get_pin_pub = rospy.Publisher('~get_pin', msgs.DigitalRead)
+        self.pin_change_pub = rospy.Publisher('~pin_change', msgs.DigitalChange)
         rospy.Service('~set_pin', DigitalWrite, self._set_pin_handler)
         
         # Start polling the sensors and base controller
@@ -134,6 +135,15 @@ class RPiGPIO():
         assert msg.pin in self.directions, 'Pin %s has not been exported.' % msg.pin
         assert self.directions[msg.pin] == OUT, 'Pin %s is not an output.' % msg.pin
         wiringpi2.digitalWrite(msg.pin, msg.state)
+        
+        old_state = self.states.get(pin, None)
+        self.states[pin] = msg.state
+        if old_state != msg.state:
+            new_msg = msgs.DigitalChange()
+            new_msg.pin = msg.pin
+            new_msg.state = msg.state
+            self.pin_change_pub.publish(new_msg)
+        
         return DigitalWriteResponse()
  
     def shutdown(self):
