@@ -51,7 +51,7 @@ class RPiGPIO():
         rospy.init_node('rpi_gpio', log_level=rospy.DEBUG)
         
         # Pin numbers are the GPIO# value, not the literal pin number.
-        # Setting direction here is necessary because wiringpi2 doesn't support setMode() at time of writing.
+        # Setting direction here is necessary because wiringpi doesn't support setMode() at time of writing.
         self.directions = rospy.get_param("~directions", {})
         
         # These states will be set to pins right before the node shuts down.
@@ -80,7 +80,7 @@ class RPiGPIO():
             
             self.export_pin(pin, direction)
         
-        wiringpi2.wiringPiSetupSys()
+        wiringpi.wiringPiSetupSys()
         
         for pin, state in self.states.items():
             if not isinstance(pin, int):
@@ -115,26 +115,29 @@ class RPiGPIO():
 
             r.sleep()
  
-    def export_pin(self, pin, direction):
+    def export_pin(self, pin, direction, max_retries=10):
         if not os.path.isfile('/sys/class/gpio/gpio{pin}'.format(pin=pin)):
             cmd = 'echo {pin} > /sys/class/gpio/export'.format(pin=pin)
             print cmd
             os.system(cmd)
-        while 1:
+        success = False
+        for retry in xrange(max_retries):
             cmd = 'echo {direction} > /sys/class/gpio/gpio{pin}/direction'.format(pin=pin, direction=direction)
             print cmd
             ret = os.system(cmd)
             if ret:
                 time.sleep(0.1)
             else:
+                success = True
                 break
+        assert success, 'Unable to expot pin %s as %s: %s' % (pin, direction, ret)
  
     def _set_pin_handler(self, msg):
         assert msg.pin in RPI2_GPIO_PINS, 'Invalid pin: %s' % msg.pin
         assert msg.state in (True, False, 0, 1), 'Invalid state: %s' % msg.state
         assert msg.pin in self.directions, 'Pin %s has not been exported.' % msg.pin
         assert self.directions[msg.pin] == OUT, 'Pin %s is not an output.' % msg.pin
-        wiringpi2.digitalWrite(msg.pin, msg.state)
+        wiringpi.digitalWrite(msg.pin, msg.state)
         
         old_state = self.states.get(msg.pin, None)
         self.states[msg.pin] = msg.state
