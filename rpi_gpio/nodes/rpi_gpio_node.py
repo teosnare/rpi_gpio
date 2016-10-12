@@ -4,7 +4,7 @@ import os, time
 
 import rospy
 
-import wiringpi2
+import wiringpi
 
 IN = 'in'
 OUT = 'out'
