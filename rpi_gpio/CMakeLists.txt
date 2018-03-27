@@ -28,6 +28,7 @@ add_message_files(
    FILES
    DigitalRead.msg
    DigitalChange.msg
+   DigitalChangeArray.msg
 )
 
 ## Generate services in the 'srv' folder

@@ -103,6 +103,7 @@ class RPiGPIO():
         # Define publishers and services.
         #self.get_pin_pub = rospy.Publisher('~get_pin', msgs.DigitalRead)
         self.pin_change_pub = rospy.Publisher('~pin_change', msgs.DigitalChange, queue_size=10)
+        self.pin_status_pub = rospy.Publisher('~pin_status', msgs.DigitalChangeArray, queue_size=10)
         rospy.Service('~set_pin', DigitalWrite, self._set_pin_handler)
         
         # Start polling the sensors and base controller
@@ -112,6 +113,17 @@ class RPiGPIO():
             now = rospy.Time.now()
 
             #TODO: read all readable-pins and publish an event on change
+            new_status = msgs.DigitalChangeArray()
+            for pin, direction in self.directions.items():
+                pin = int(pin)
+                v = wiringpi.digitalRead(pin)
+                print "Pin ", pin, v
+                new_msg = msgs.DigitalChange()
+                new_msg.pin = pin
+                new_msg.state = v
+                new_status.pins.append(new_msg)
+            self.pin_status_pub.publish(new_status)
+
 
             r.sleep()
  
@@ -153,7 +165,7 @@ class RPiGPIO():
         
         # Reset pin state.
         rospy.loginfo("Reseting pin states...")
-        for pin, state in self.shutdown_states.iteritems():
+        for pin, state in self.shutdown_states.items():
             msg = DigitalWrite()
             msg.pin = int(pin)
             msg.state = state
@@ -161,7 +173,7 @@ class RPiGPIO():
         
         # Reset pin exports.
         rospy.loginfo("Unexporting pins...")
-        for pin, direction in self.directions.iteritems():
+        for pin, direction in self.directions.items():
             cmd = 'cd /sys/class/gpio; echo {pin} > unexport'.format(pin=pin)
             print cmd
             os.system(cmd)

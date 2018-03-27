@@ -1,0 +1,18 @@
+# Define the pins that are inputs or outputs.
+directions:
+  '16': out
+  '20': out
+  '21': out
+  '19': in
+  '26': in
+
+# Define default pin states.
+states:
+  '16': 0
+  '20': 0
+  '21': 0
+
+shutdown_states:
+  '16': 0
+  '20': 0
+  '21': 0
