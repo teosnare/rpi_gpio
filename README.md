@@ -19,6 +19,13 @@ Create an [overlay workspace](http://wiki.ros.org/catkin/Tutorials/workspace_ove
     source /opt/ros/indigo/setup.bash
     cd ..
     catkin_make
+    
+IMPORTANT
+    When compiling on Raspberry, define IS_RPI=1 like this:
+	
+    catkin_make -DIS_RPI=1	
+    
+    To use the package on other platform just to import message types, compile without this option.
 
 Then, when initializing your shell environment for your main workspace, ensure you source this overlay like:
 

@@ -117,7 +117,7 @@ class RPiGPIO():
             for pin, direction in self.directions.items():
                 pin = int(pin)
                 v = wiringpi.digitalRead(pin)
-                print "Pin ", pin, v
+                # print "Pin ", pin, v
                 new_msg = msgs.DigitalChange()
                 new_msg.pin = pin
                 new_msg.state = v
@@ -129,12 +129,12 @@ class RPiGPIO():
  
     def export_pin(self, pin, direction, max_retries=10):
         if not os.path.isfile('/sys/class/gpio/gpio{pin}'.format(pin=pin)):
-            cmd = 'echo {pin} > /sys/class/gpio/export'.format(pin=pin)
+            cmd = '/bin/echo {pin} > /sys/class/gpio/export'.format(pin=pin)
             print cmd
             os.system(cmd)
         success = False
         for retry in xrange(max_retries):
-            cmd = 'echo {direction} > /sys/class/gpio/gpio{pin}/direction'.format(pin=pin, direction=direction)
+            cmd = '/bin/echo {direction} > /sys/class/gpio/gpio{pin}/direction'.format(pin=pin, direction=direction)
             print cmd
             ret = os.system(cmd)
             if ret:
